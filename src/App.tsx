@@ -15,14 +15,20 @@ import * as THREE from 'three';
 import { MathUtils } from 'three';
 import * as random from 'maath/random';
 import { GestureRecognizer, FilesetResolver, DrawingUtils } from "@mediapipe/tasks-vision";
+import { useThree } from '@react-three/fiber';
+
 
 // --- 动态生成照片列表 (top.jpg + 1.jpg 到 31.jpg) ---
 const TOTAL_NUMBERED_PHOTOS = 31;
 // 修改：将 top.jpg 加入到数组开头
 const bodyPhotoPaths = [
-  '/photos/top.jpg',
-  ...Array.from({ length: TOTAL_NUMBERED_PHOTOS }, (_, i) => `/photos/${i + 1}.jpg`)
+  `${import.meta.env.BASE_URL}photos/top.jpg`,
+  ...Array.from(
+    { length: TOTAL_NUMBERED_PHOTOS },
+    (_, i) => `${import.meta.env.BASE_URL}photos/${i + 1}.jpg`
+  )
 ];
+
 
 // --- 视觉配置 ---
 const CONFIG = {
@@ -479,6 +485,9 @@ const Experience = ({
   const treeRef = useRef<THREE.Group>(null);
   const controlsRef = useRef<any>(null);
   const zoomVelocityRef = useRef(0);
+  const { size } = useThree();
+  const isMobile = window.innerWidth < 768;
+  //const isMobile = size.width < 768;
   useFrame((_, delta) => {
   if (!treeRef.current) return;
 
@@ -541,7 +550,12 @@ const Experience = ({
 
   return (
     <>
-      <PerspectiveCamera makeDefault position={[0, 8, 60]} fov={45} />
+      <PerspectiveCamera
+        makeDefault
+        position={isMobile ? [0, 6, 38] : [0, 8, 60]}
+        fov={isMobile ? 55 : 45}
+      />
+
       <OrbitControls ref={controlsRef} enablePan={false} enableZoom={true} minDistance={30} maxDistance={120} autoRotate={rotationSpeed === 0 && sceneState === 'FORMED'} autoRotateSpeed={0.3} maxPolarAngle={Math.PI / 1.7} />
 
       <color attach="background" args={['#000300']} />
@@ -565,7 +579,11 @@ const Experience = ({
       <pointLight position={[-30, 10, -30]} intensity={50} color={CONFIG.colors.gold} />
       <pointLight position={[0, -20, 10]} intensity={30} color="#ffffff" />
 
-      <group ref={treeRef} position={[0, -6, 0]}>
+      <group
+        ref={treeRef}
+        position={[0, isMobile ? -5 : -6, 0]}
+        scale={isMobile ? 0.8 : 1}
+      >
         <Foliage state={sceneState} />
         <Suspense fallback={null}>
            <PhotoOrnaments state={sceneState} />
