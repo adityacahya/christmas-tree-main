@@ -21,14 +21,17 @@ import { useThree } from '@react-three/fiber';
 // --- 动态生成照片列表 (top.jpg + 1.jpg 到 31.jpg) ---
 const TOTAL_NUMBERED_PHOTOS = 31;
 // 修改：将 top.jpg 加入到数组开头
+const BASE = "/christmas-tree-main/";
+
 const bodyPhotoPaths = [
-  `${import.meta.env.BASE_URL}photos/top.jpg`,
+  `${BASE}photos/top.jpg`,
   ...Array.from(
     { length: TOTAL_NUMBERED_PHOTOS },
-    (_, i) => `${import.meta.env.BASE_URL}photos/${i + 1}.jpg`
+    (_, i) => `${BASE}photos/${i + 1}.jpg`
   )
 ];
-const isMobile = window.innerWidth < 768;
+
+const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
 
 
@@ -50,11 +53,12 @@ const CONFIG = {
     candyColors: ['#FF0000', '#FFFFFF']
   },
   counts: {
-    foliage: window.innerWidth < 768 ? 4000 : 15000,
-    ornaments: 300,   // 拍立得照片数量
-    elements: 200,    // 圣诞元素数量
-    lights: window.innerWidth < 768 ? 120 : 400       // 彩灯数量
+    foliage: isMobile ? 2500 : 15000,
+    ornaments: isMobile ? 80 : 300,
+    elements: isMobile ? 60 : 200,
+    lights: isMobile ? 80 : 400
   },
+
   tree: { height: 22, radius: 9 }, // 树体尺寸
   photos: {
     // top 属性不再需要，因为已经移入 body
