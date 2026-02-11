@@ -28,6 +28,8 @@ const bodyPhotoPaths = [
     (_, i) => `${import.meta.env.BASE_URL}photos/${i + 1}.jpg`
   )
 ];
+const isMobile = window.innerWidth < 768;
+
 
 
 // --- 视觉配置 ---
@@ -48,10 +50,10 @@ const CONFIG = {
     candyColors: ['#FF0000', '#FFFFFF']
   },
   counts: {
-    foliage: 15000,
+    foliage: window.innerWidth < 768 ? 4000 : 15000,
     ornaments: 300,   // 拍立得照片数量
     elements: 200,    // 圣诞元素数量
-    lights: 400       // 彩灯数量
+    lights: window.innerWidth < 768 ? 120 : 400       // 彩灯数量
   },
   tree: { height: 22, radius: 9 }, // 树体尺寸
   photos: {
@@ -559,7 +561,14 @@ const Experience = ({
       <OrbitControls ref={controlsRef} enablePan={false} enableZoom={true} minDistance={30} maxDistance={120} autoRotate={rotationSpeed === 0 && sceneState === 'FORMED'} autoRotateSpeed={0.3} maxPolarAngle={Math.PI / 1.7} />
 
       <color attach="background" args={['#000300']} />
-      <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
+      <Stars
+        radius={80}
+        depth={40}
+        count={isMobile ? 1500 : 5000}
+        factor={3}
+        saturation={0}
+        fade
+      />
       <Environment preset="night" background={false} />
 
       <ambientLight intensity={0.4} color="#003311" />
@@ -591,13 +600,28 @@ const Experience = ({
            <FairyLights state={sceneState} />
            <TopStar state={sceneState} />
         </Suspense>
-        <Sparkles count={600} scale={50} size={8} speed={0.4} opacity={0.4} color={CONFIG.colors.silver} />
+        <Sparkles
+          count={isMobile ? 120 : 600}
+          scale={40}
+          size={6}
+          speed={0.3}
+          opacity={0.3}
+        />
       </group>
 
-      <EffectComposer>
-        <Bloom luminanceThreshold={0.8} luminanceSmoothing={0.1} intensity={1.5} radius={0.5} mipmapBlur />
-        <Vignette eskil={false} offset={0.1} darkness={1.2} />
-      </EffectComposer>
+      {!isMobile && (
+        <EffectComposer>
+          <Bloom
+            luminanceThreshold={0.8}
+            luminanceSmoothing={0.1}
+            intensity={1.2}
+            radius={0.4}
+            mipmapBlur
+          />
+          <Vignette eskil={false} offset={0.1} darkness={1.2} />
+        </EffectComposer>
+      )}
+
     </>
   );
 };
@@ -792,6 +816,7 @@ export default function GrandTreeApp() {
   const [rotationSpeed, setRotationSpeed] = useState(0);
   const [aiStatus, setAiStatus] = useState("INITIALIZING...");
   const [debugMode, setDebugMode] = useState(false);
+  const isMobile = window.innerWidth < 768;
   const [gestureData, setGestureData] = useState({
     x: 0,
     y: 0,
@@ -803,7 +828,15 @@ export default function GrandTreeApp() {
   return (
     <div style={{ width: '100vw', height: '100vh', backgroundColor: '#000', position: 'relative', overflow: 'hidden' }}>
       <div style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, zIndex: 1 }}>
-        <Canvas dpr={[1, 2]} gl={{ toneMapping: THREE.ReinhardToneMapping }} shadows>
+        <Canvas
+          dpr={isMobile ? 1 : [1, 2]}
+          gl={{
+            antialias: false,
+            powerPreference: "high-performance",
+            toneMapping: THREE.ReinhardToneMapping
+          }}
+          shadows={false}
+        >
             <Experience
               sceneState={sceneState}
               rotationSpeed={rotationSpeed}
